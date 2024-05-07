@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Table</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<table id="dynamicTable">
+    <thead>
+        <tr id="headerRow">
+            <!-- Header row will be generated dynamically -->
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        <!-- Table body will be generated dynamically -->
+    </tbody>
+</table>
+
+<script>
+    // Sample data for demonstration
+    var data = [
+        ["Name", "Age", "Gender"],
+        ["John", 30, "Male"],
+        ["Alice", 25, "Female"],
+        ["Bob", 35, "Male"]
+    ];
+
+    // Function to dynamically generate the table
+    function generateTable(data) {
+        var table = document.getElementById("dynamicTable");
+        var headerRow = document.getElementById("headerRow");
+        var tableBody = document.getElementById("tableBody");
+
+        // Clear previous table contents
+        headerRow.innerHTML = "";
+        tableBody.innerHTML = "";
+
+        // Generate header row
+        var headerHTML = "";
+        for (var i = 0; i < data[0].length; i++) {
+            headerHTML += "<th>" + data[0][i] + "</th>";
+        }
+        headerRow.innerHTML = headerHTML;
+
+        // Generate table body
+        for (var i = 1; i < data.length; i++) {
+            var row = document.createElement("tr");
+            for (var j = 0; j < data[i].length; j++) {
+                var cell = document.createElement("td");
+                cell.textContent = data[i][j];
+                row.appendChild(cell);
+            }
+            tableBody.appendChild(row);
+        }
+    }
+
+    // Call the function with the sample data
+    generateTable(data);
+</script>
+
+</body>
+</html>

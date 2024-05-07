@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="../static/files/style.css" />
+        <!--<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='files/style.css')}}" />-->
+        <title>Link CSS to HTML</title>
+    </head>
+
+    <body>
+        <div class="main_div">
+            <div class="banner">
+                <div class="div_home">
+                    <a href="{{ url_for('index') }}">
+                        <!--<img class="home_image" src="{{ url_for('static', filename='pictures/icon_rocket.svg') }}" alt="Rocket Icon" width="100" height="100">-->
+                    </a>
+                </div>
+
+                <div class="div_title">
+                    <h1 class="title">Welcome to the game stat-tracker project app</h1>
+                </div>
+            </div>
+
+            <div class="content_div">
+                <div class="navi">
+                    <ul>
+                        <li>
+                            <a href="{{ url_for('input') }}">Input round info</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('data') }}">Data</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('all_matches') }}">All matches</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('match') }}">Match</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('round') }}">Round</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('about') }}">About</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
