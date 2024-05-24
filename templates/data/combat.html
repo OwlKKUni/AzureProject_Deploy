@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Table</title>
+    <title>combat Table</title>
     <style>
         table {
             border-collapse: collapse;
@@ -19,7 +19,11 @@
         }
     </style>
 </head>
+
 <body>
+<h1>Combat Data</h1>
+<p>This page contains combat data statistics.</p>
+<a href="{{ url_for('index') }}" class="back-button">Back to Home</a>
 
 <table id="dynamicTable">
     <thead>
@@ -33,15 +37,10 @@
 </table>
 
 <script>
-    // Sample data for demonstration
-    var data = [
-        ["Name", "Age", "Gender"],
-        ["John", 30, "Male"],
-        ["Alice", 25, "Female"],
-        ["Bob", 35, "Male"]
-    ];
+    fetch('/data/combat')
+        .then(response => response.json())
+        .then(data => generateTable(data));
 
-    // Function to dynamically generate the table
     function generateTable(data) {
         var table = document.getElementById("dynamicTable");
         var headerRow = document.getElementById("headerRow");
@@ -69,10 +68,10 @@
             tableBody.appendChild(row);
         }
     }
-
-    // Call the function with the sample data
-    generateTable(data);
 </script>
 
+<form action="/">
+    <input type="submit" value="Home">
+</form>
 </body>
 </html>

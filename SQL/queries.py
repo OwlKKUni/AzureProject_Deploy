@@ -1,6 +1,7 @@
 import os
-
 import pyodbc
+import random
+import datetime
 
 
 class DBConnString:
@@ -30,6 +31,11 @@ class SQLQuery:
         return query
 
 
+# CONN STRING FOR SERVERS
+Server1 = DBConnString(os.environ['AZURE_SERVER'], os.environ['AZURE_DATABASE'], os.environ['AZURE_SERVER_USERNAME'],
+                       os.environ['AZURE_DB_PASSWORD'], '{ODBC Driver 18 for SQL Server}')
+
+# QUERIES FOR CREATING EMPTY TABLES
 tquery_objectives = SQLQuery(table_name='objectives_completed',
                              main_objectives='INT',
                              optional_objectives='INT',
@@ -62,14 +68,10 @@ tquery_combat = SQLQuery(table_name='combat',
                          samples_extracted='INT',
                          stratagems_used='INT',
                          melee_kills='INT',
-                         times_reinforcing_='INT',
+                         times_reinforcing='INT',
                          friendly_fire_damage='INT',
                          distance_travelled='INT',
                          ).generate_query()
-
-# Create more connection string for other dbs or servers if You have them
-Server1 = DBConnString(os.environ['AZURE_SERVER'], os.environ['AZURE_DATABASE'], os.environ['AZURE_SERVER_USERNAME'],
-                       os.environ['AZURE_DB_PASSWORD'], '{ODBC Driver 18 for SQL Server}')
 
 
 def connect(conn_string):
@@ -82,64 +84,183 @@ def connect(conn_string):
         return None
 
 
-def query_create_tables(server_name: str, table_queries: list) -> None:
-    with connect(server_name).cursor() as cursor:
-        for table_query in table_queries:
-            cursor.execute(table_query)
-        connect.commit()
-        connect.close()
-    print('Empty tables created')
+# CREATE TABLES ----------------------------
+# WORKS
+def query_create_tables(server_name: DBConnString, table_queries: list) -> None:
+    try:
+        if connect(server_name) is None:
+            print("Failed to connect to the database.")
+            return
+
+        with connect(server_name).cursor() as cursor:
+            for table_query in table_queries:
+                cursor.execute(table_query)
+                print(f'Table "{table_query.split(" ")[2]}" created')
+            connect(server_name).commit()
+
+    except pyodbc.Error as e:
+        print(f"Error creating data: {e}")
 
 
-# Print only row with specified ID
-def query_read_row(table: str, row_number: int) -> None:
-    with connect.cursor() as cursor:
+# READ TABLES ----------------------------
+def query_read_row(server_name: DBConnString, table: str, row_number: int) -> None:
+    with connect(server_name).cursor as cursor:
         row = cursor.execute(f'SELECT * FROM {table} WHERE rowid = ?', (row_number,))
         print(row)
-        connect.close()
 
 
-# DONE
-def query_read_table(table: str) -> None:
-    with connect.cursor() as cursor:
+def query_read_table(server_name: DBConnString, table: str) -> None:
+    with connect(server_name).cursor as cursor:
         cursor.execute(f'SELECT * FROM {table}')
         rows = cursor.fetchall()
         for row in rows:
             print(row)
-        connect.close()
 
 
-#
-def query_delete_table(table_name: str) -> None:
-    sql_query = f"IF OBJECT_ID('{table_name}', 'U') IS NOT NULL DROP TABLE {table_name}"
-
-    with connect.cursor() as cursor:
-        cursor.execute(sql_query)
-        connect.commit()
-        connect().close()
+# GET ----------------------------
 
 
+# Works
+def query_get_table_names(server_name: DBConnString):
+    sql_query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'"
+
+    try:
+        with connect(server_name).cursor() as cursor:
+            cursor.execute(sql_query)
+            table_names = [row.TABLE_NAME for row in cursor.fetchall()]
+
+        if table_names:
+            return table_names
+
+        else:
+            print("No data found.")
+            return []
+
+    except pyodbc.Error as e:
+        print(f"Error executing SQL query: {e}")
+        return []
+
+    # returns: [['id', 'kills', 'accuracy', 'shots_fired', 'deaths', 'stims_used',
+    # 'accidentals', 'samples_extracted', 'stratagems_used', 'melee_kills',
+    # 'times_reinforcing_', 'friendly_fire_damage', 'distance_travelled']]
+
+
+# WORKS
+def query_get_table_column_names(server_name: DBConnString, table: str) -> list:
+    data = []
+    with connect(server_name).cursor() as cursor:
+        cursor.execute(f'SELECT * FROM {table}')
+        columns = [column[0] for column in cursor.description]
+        rows = cursor.fetchall()
+        data.append(columns)
+        for row in rows:
+            data.append(list(row))
+    return data
+
+
+def query_get_data_from_table(server_name: DBConnString, table: str) -> list:
+    columns = query_get_table_column_names(server_name, table)
+    with connect(server_name).cursor() as cursor:
+        cursor.execute(f"SELECT * FROM {table}")
+        rows = cursor.fetchall()
+        data = [columns] + [list(row) for row in rows]
+        return data
+
+
+# UPDATE TABLES ----------------------------
 # test this if it works
-def query_update_cell(table_name: str, column_name: str, row_number: int, value: any) -> None:
+def query_update_row():
+    pass
+
+
+def query_update_cell(server_name: DBConnString, table_name: str,
+                      column_name: str, row_number: int, value: any) -> None:
     sql_query = f"UPDATE {table_name} SET {column_name} = {value} WHERE {row_number} = ?"
 
-    with connect.cursor() as cursor:
-        cursor.execute(sql_query)
-        connect().commit()
-        connect().close()
+    try:
+        with connect(server_name).cursor as cursor:
+            cursor.execute(sql_query, (value, row_number))
+            connect(server_name).commit()
+        print(f'Table "{table_name}" updated')
+
+    except pyodbc.Error as e:
+        print(f"Error updating table '{table_name}': {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 
-# write this
-def query_delete_row(table_name: str, row_number: int) -> None:
+# DELETE --------------------------------
+# WORKS
+def query_delete_all_tables(server_name: DBConnString):
+    try:
+        table_names = query_get_table_names(server_name)
+        if table_names:
+            for table_name in table_names:
+                query_delete_table(server_name, table_name)
+        else:
+            print("No data found to delete.")
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+# WORKS
+def query_delete_table(server_name: DBConnString, table_name: str) -> None:
+    sql_query = f"IF OBJECT_ID('{table_name}', 'U') IS NOT NULL DROP TABLE {table_name}"
+
+    try:
+        with connect(server_name).cursor() as cursor:
+            cursor.execute(sql_query)
+            connect(server_name).commit()
+        print(f'Table "{table_name}" deleted')
+
+    except pyodbc.Error as e:
+        print(f"Error deleting table '{table_name}': {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+def query_delete_row(server_name: DBConnString, table_name: str, row_number: int) -> None:
     sql_query = f"DELETE FROM {table_name} WHERE rowid = {row_number}"
 
-    with connect.cursor() as cursor:
+    with connect(server_name).cursor() as cursor:
         cursor.execute(sql_query)
-        connect().commit()
-        connect().close()
+        connect(server_name).commit()
+
+
+def query_put_row(server_name: DBConnString, table_name: str, **kwargs) -> None:
+    # Extract columns and values from kwargs
+    columns = ', '.join(kwargs.keys())
+    values_placeholders = ', '.join(['?'] * len(kwargs))
+    values = tuple(kwargs.values())
+
+    sql_query = f"INSERT INTO {table_name} ({columns}) VALUES ({values_placeholders})"
+
+    try:
+        with connect(server_name).cursor() as cursor:
+            cursor.execute(sql_query, values)
+            connect(server_name).commit()
+        print(f"Row inserted into table '{table_name}'")
+
+    except pyodbc.Error as e:
+        print(f"Error inserting row into table '{table_name}': {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+# Aux functions ------------------------
+def query_get_last_id_value(server_name: DBConnString, table_name: str) -> int:
+    sql_query = f"SELECT TOP 1 id FROM {table_name} ORDER BY id DESC"
+    try:
+        with connect(server_name).cursor() as cursor:
+            cursor.execute(sql_query)
+            result = cursor.fetchone()
+            return result[0] if result else None
+
+    except pyodbc.Error as e:
+        print(f"Error occurred: {e}")
+        return None
 
 
 if __name__ == "__main__":
-    query_tables = [tquery_objectives, tquery_samples, tquery_currency, tquery_samples]
-    query_create_tables(Server1, query_tables)
-    # query_delete_table('Employee')
+    pass
