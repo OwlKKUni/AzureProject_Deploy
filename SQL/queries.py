@@ -9,6 +9,7 @@ class DBConnString:
         self.username = username
         self.password = password
         self.driver = driver
+        #
 
 
 class SQLQuery:
