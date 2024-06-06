@@ -28,7 +28,7 @@ header {
 }
 
 .navi ul li {
-    display: inline-block; /*was inline*/
+    display: inline-block; /* was inline */
     margin-right: 10px;
     position: relative; /* Necessary for dropdown positioning */
 }
@@ -112,4 +112,81 @@ header {
 
 .back-button:hover {
     background-color: #555;
+}
+
+.button-row {
+    margin-top: 20px;
+}
+.button-row form {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+/* Styles for the header container in the data tab*/
+.header-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.header-container h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.data-section {
+    margin-bottom: 40px; /* Add space between tables */
+}
+
+/* Styles for the data table */
+.data-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px 0;
+    font-size: 1em;
+    text-align: left;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+
+.data-table th, .data-table td {
+    border: 1px solid #dddddd;
+    padding: 12px 15px; /* Increased padding for better readability */
+    text-align: left;
+    word-wrap: break-word; /* Allow column names to wrap */
+}
+
+.data-table th {
+    background-color: #009879; /* Changed background color for header */
+    color: #ffffff; /* White text for header */
+    text-transform: uppercase; /* Uppercase text for header */
+    white-space: normal; /* Allow wrapping */
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #f3f3f3; /* Slightly darker than your previous color */
+}
+
+.data-table tr:hover {
+    background-color: #f1f1f1; /* Lighter hover effect */
+}
+
+.data-table tr {
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+@media screen and (max-width: 600px) {
+    .data-table th, .data-table td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .data-table tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 10px;
+    }
+    .data-table th {
+        text-align: center;
+    }
 }

@@ -1,35 +1,44 @@
-
-{% extends 'index.html' %}
+{% extends "index.html" %}
+{% block title %}All Dives Data{% endblock %}
 {% block content %}
-<h1 class="subtitle">All Matches</h1>
-<h1 class="content">This app was prepared by Kacper Kępa</h1>
-{% endblock %}
+<style>
+    .header-container {
+        display: flex;
+        justify-content: center; /* Center horizontally */
+        align-items: center;
+        text-align: center; /* Center text */
+    }
 
-<!--
- <!DOCTYPE html>
-<html>
-<head>
-    <title>Data from Azure SQL Server</title>
-</head>
-<body>
-    <h1>Data from Azure SQL Server</h1>
-    <table>
+    .header-container h2 {
+        margin: 0;
+    }
+</style>
+<div class="header-container">
+    <h2>All Dives Data</h2>
+</div>
+
+{% for table_name, table_data in data.items() %}
+<div class="data-section">
+    <h3>{{ table_name | replace('_', ' ') | title }} Data</h3>
+    <table class="data-table">
         <thead>
             <tr>
-                <th>Column 1</th>
-                <th>Column 2</th>
+                {% for column in table_data[0] %}
+                    <th>{{ column }}</th>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
-            {% for row in data %}
-            <tr>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-            </tr>
+            {% for row in table_data[1:] %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
             {% endfor %}
         </tbody>
     </table>
-</body>
-</html>
+</div>
+{% endfor %}
+{% endblock %}
 
- -->
