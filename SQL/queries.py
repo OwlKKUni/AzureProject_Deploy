@@ -9,7 +9,6 @@ class DBConnString:
         self.username = username
         self.password = password
         self.driver = driver
-        #
 
 
 class SQLQuery:
@@ -224,12 +223,26 @@ def query_delete_table(server_name: DBConnString, table_name: str) -> None:
         print(f"An unexpected error occurred: {e}")
 
 
-def query_delete_row(server_name: DBConnString, table_name: str, row_number: int) -> None:
-    sql_query = f"DELETE FROM {table_name} WHERE rowid = {row_number}"
+# def query_delete_row(server_name: DBConnString, table_name: str, row_number: int) -> None:
+#     sql_query = f"DELETE FROM {table_name} WHERE rowid = {row_number}"
+#
+#     with connect(server_name).cursor() as cursor:
+#         cursor.execute(sql_query)
+#         connect(server_name).commit()
 
-    with connect(server_name).cursor() as cursor:
-        cursor.execute(sql_query)
-        connect(server_name).commit()
+def query_delete_row(server_name: DBConnString, table_name: str, id_value: int) -> None:
+    sql_query = f"DELETE FROM {table_name} WHERE id = ?"
+
+    try:
+        with connect(server_name).cursor() as cursor:
+            cursor.execute(sql_query, (id_value,))
+            connect(server_name).commit()
+        print(f"Row with ID {id_value} deleted from table '{table_name}'")
+
+    except pyodbc.Error as e:
+        print(f"Error deleting row from table '{table_name}': {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 
 # PUT
